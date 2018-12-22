@@ -27,7 +27,7 @@
         <ImageButton
             android:id="@+id/button_prev"
             android:layout_width="0dp"
-            android:layout_height="@dimen/app_widget_small_button_height"
+            android:layout_height="72dp"
             android:layout_weight="1"
             android:background="@drawable/widget_selector_light"
             tools:ignore="ContentDescription"
@@ -37,7 +37,7 @@
         <ImageButton
             android:id="@+id/button_toggle_play_pause"
             android:layout_width="0dp"
-            android:layout_height="@dimen/app_widget_small_button_height"
+            android:layout_height="72dp"
             android:layout_weight="1"
             android:background="@drawable/widget_selector_light"
             tools:ignore="ContentDescription"
@@ -47,7 +47,7 @@
         <ImageButton
             android:id="@+id/button_next"
             android:layout_width="0dp"
-            android:layout_height="@dimen/app_widget_small_button_height"
+            android:layout_height="72dp"
             android:layout_weight="1"
             android:background="@drawable/widget_selector_light"
             tools:ignore="ContentDescription"
