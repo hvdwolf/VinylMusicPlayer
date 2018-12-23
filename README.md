@@ -4,7 +4,7 @@
 This is Adrien Poupa's Vinyl Music Player. As I'm using it on an Android head unit, I wanted bigger buttons.
 That is the only change. It comes down to creating a few extra "drawable" xml files and adapting a few layout xmls and a few java files to use these added drawable xmls.
 
-![See comparisons](./images/comparison.md)
+[See comparisons](./images/comparison.md)
 
 **A material designed local music player for Android.**
 
