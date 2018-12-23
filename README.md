@@ -1,9 +1,10 @@
 # Vinyl Music Player
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://github.com/AdrienPoupa/VinylMusicPlayer/blob/master/LICENSE.txt)
 
-<a href="https://f-droid.org/packages/com.poupa.vinylmusicplayer/" target="_blank">
-<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="90"/></a>
-<a href='https://play.google.com/store/apps/details?id=com.poupa.vinylmusicplayer'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="90"/></a>
+This is Adrien Poupa's Vinyl Music Player. As I'm using it on an Android head unit, I wanted bigger buttons.
+That is the only change. It comes down to creating a few extra "drawable" xml files and adapting a few layout xmls and a few java files to use these added drawable xmls.
+
+![See comparisons](./images/comparison.md)
 
 **A material designed local music player for Android.**
 
@@ -16,3 +17,4 @@
 Icon made by [Nikita Golubev](https://www.flaticon.com/authors/nikita-golubev) from www.flaticon.com
 
 Album image by [Virginia State Parks](https://www.flickr.com/photos/vastateparksstaff/38645226714/) (CC BY 2.0)
+
