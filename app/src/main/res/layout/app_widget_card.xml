@@ -72,7 +72,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/widget_selector_light"
                 tools:ignore="ContentDescription"
-                tools:src="@drawable/ic_skip_previous_white_24dp"
+                tools:src="@drawable/ic_skip_previous_white_48dp"
                 tools:tint="@color/ate_secondary_text_light" />
 
             <ImageButton
@@ -82,7 +82,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/widget_selector_light"
                 tools:ignore="ContentDescription"
-                tools:src="@drawable/ic_play_arrow_white_24dp"
+                tools:src="@drawable/ic_play_arrow_white_56dp"
                 tools:tint="@color/ate_secondary_text_light" />
 
             <ImageButton
@@ -92,7 +92,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/widget_selector_light"
                 tools:ignore="ContentDescription"
-                tools:src="@drawable/ic_skip_next_white_24dp"
+                tools:src="@drawable/ic_skip_next_white_48dp"
                 tools:tint="@color/ate_secondary_text_light" />
 
         </LinearLayout>
