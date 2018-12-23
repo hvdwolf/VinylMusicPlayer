@@ -1,4 +1,4 @@
-# Vinyl Music Player
+# Vinyl Music Player Big Buttons
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://github.com/AdrienPoupa/VinylMusicPlayer/blob/master/LICENSE.txt)
 
 This is Adrien Poupa's Vinyl Music Player. As I'm using it on an Android head unit, I wanted bigger buttons.
