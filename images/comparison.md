@@ -6,13 +6,13 @@ That is the only change. It comes down to creating a few extra "drawable" xml fi
 
 Main screen:
 **Original**
-![original main screen](./images/org_main_screen.jpg)
+![Original main screen](org_main_screen.jpg)
 **Bigger Buttons**
-![Bigger Buttons main screen](./images/new_main_screen.jpg)
+![Bigger Buttons main screen](new_main_screen.jpg)
 
 
-**Original widget**
-![original widget](./images/org_widget.jpg)
-**Bigger Buttons widget**
-![original widget](./images/new_widget.jpg)
+**Original widget**<br>
+![original widget](org_widget.jpg)<br>
+**Bigger Buttons widget**<br>
+![original widget](new_widget.jpg)
 
