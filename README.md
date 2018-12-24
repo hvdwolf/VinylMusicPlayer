@@ -3,6 +3,7 @@
 
 This is Adrien Poupa's Vinyl Music Player. As I'm using it on an Android head unit, I wanted bigger buttons.
 That is the only change. It comes down to creating a few extra "drawable" xml files and adapting a few layout xmls and a few java files to use these added drawable xmls.
+This only works "nicely scaled" on a 1024x600 head unit.
 
 [See comparisons](./images/comparison.md)
 
@@ -10,9 +11,8 @@ That is the only change. It comes down to creating a few extra "drawable" xml fi
 
 **Forked from Phonograph; makes all Pro features free, as they used to be**
 
-[Original code](https://github.com/kabouzeid/Phonograph)
-
-![Screenshots](./art/art.png?raw=true)
+[Original code](https://github.com/kabouzeid/Phonograph)<br>
+[Adrien Poupa's original code](https://github.com/AdrienPoupa/VinylMusicPlayer)
 
 Icon made by [Nikita Golubev](https://www.flaticon.com/authors/nikita-golubev) from www.flaticon.com
 
