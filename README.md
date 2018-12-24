@@ -5,7 +5,7 @@ This is Adrien Poupa's Vinyl Music Player. As I'm using it on an Android head un
 That is the only change. It comes down to creating a few extra "drawable" xml files and adapting a few layout xmls and a few java files to use these added drawable xmls.
 This only works "nicely scaled" on a 1024x600 head unit.
 
-[See comparisons](./images/comparison.md)
+See screenshots below to compare.
 
 **A material designed local music player for Android.**
 
@@ -17,4 +17,17 @@ This only works "nicely scaled" on a 1024x600 head unit.
 Icon made by [Nikita Golubev](https://www.flaticon.com/authors/nikita-golubev) from www.flaticon.com
 
 Album image by [Virginia State Parks](https://www.flickr.com/photos/vastateparksstaff/38645226714/) (CC BY 2.0)
+
+*******
+Main screen:
+**Original**
+![Original main screen](./images/org_main_screen.jpg)
+**Bigger Buttons**
+![Bigger Buttons main screen](./images/new_main_screen.jpg)
+
+
+**Original widget**<br>
+![original widget](./images/org_widget.jpg)<br>
+**Bigger Buttons widget**<br>
+![original widget](./images/new_widget.jpg)
 
