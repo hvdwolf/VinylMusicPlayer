@@ -6,8 +6,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -46,6 +48,8 @@ public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, S
     protected boolean usePalette = false;
     protected boolean showSectionName = true;
 
+    public RecyclerView recyclerView;
+
     public SongAdapter(AppCompatActivity activity, ArrayList<Song> dataSet, @LayoutRes int itemLayoutRes, boolean usePalette, @Nullable CabHolder cabHolder) {
         this(activity, dataSet, itemLayoutRes, usePalette, cabHolder, true);
     }
@@ -58,6 +62,12 @@ public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, S
         this.usePalette = usePalette;
         this.showSectionName = showSectionName;
         setHasStableIds(true);
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView rV) {
+        super.onAttachedToRecyclerView(rV);
+        recyclerView = rV;
     }
 
     public void swapDataSet(ArrayList<Song> dataSet) {
@@ -115,7 +125,6 @@ public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, S
         }
 
         loadAlbumCover(song, holder);
-
     }
 
     private void setColors(int color, ViewHolder holder) {
@@ -160,7 +169,7 @@ public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, S
     }
 
     protected String getSongText(Song song) {
-        return song.artistName;
+        return MusicUtil.getSongInfoString(song);
     }
 
     @Override
@@ -219,6 +228,12 @@ public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, S
             if (menu == null) {
                 return;
             }
+            menu.setOnTouchListener(new View.OnTouchListener() {
+                public boolean onTouch(View v, MotionEvent ev) {
+                    menu.getParent().requestDisallowInterceptTouchEvent(true);
+                    return false;
+                }
+            });
             menu.setOnClickListener(new SongMenuHelper.OnClickSongMenu(activity) {
                 @Override
                 public Song getSong() {

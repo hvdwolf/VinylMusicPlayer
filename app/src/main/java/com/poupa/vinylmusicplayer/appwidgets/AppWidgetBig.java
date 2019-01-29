@@ -24,6 +24,7 @@ import com.poupa.vinylmusicplayer.glide.VinylSimpleTarget;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.service.MusicService;
 import com.poupa.vinylmusicplayer.ui.activities.MainActivity;
+import com.poupa.vinylmusicplayer.util.ImageUtil;
 import com.poupa.vinylmusicplayer.util.Util;
 
 public class AppWidgetBig extends BaseAppWidget {
@@ -48,9 +49,9 @@ public class AppWidgetBig extends BaseAppWidget {
 
         appWidgetView.setViewVisibility(R.id.media_titles, View.INVISIBLE);
         appWidgetView.setImageViewResource(R.id.image, R.drawable.default_album_art);
-        appWidgetView.setImageViewBitmap(R.id.button_next, createBitmap(Util.getTintedVectorDrawable(context, R.drawable.ic_skip_next_white_48dp, MaterialValueHelper.getPrimaryTextColor(context, false)), 1f));
-        appWidgetView.setImageViewBitmap(R.id.button_prev, createBitmap(Util.getTintedVectorDrawable(context, R.drawable.ic_skip_previous_white_48dp, MaterialValueHelper.getPrimaryTextColor(context, false)), 1f));
-        appWidgetView.setImageViewBitmap(R.id.button_toggle_play_pause, createBitmap(Util.getTintedVectorDrawable(context, R.drawable.ic_play_arrow_white_56dp, MaterialValueHelper.getPrimaryTextColor(context, false)), 1f));
+        appWidgetView.setImageViewBitmap(R.id.button_next, ImageUtil.createBitmap(ImageUtil.getTintedVectorDrawable(context, R.drawable.ic_skip_next_white_48dp, MaterialValueHelper.getPrimaryTextColor(context, false))));
+        appWidgetView.setImageViewBitmap(R.id.button_prev, ImageUtil.createBitmap(ImageUtil.getTintedVectorDrawable(context, R.drawable.ic_skip_previous_white_48dp, MaterialValueHelper.getPrimaryTextColor(context, false))));
+        appWidgetView.setImageViewBitmap(R.id.button_toggle_play_pause, ImageUtil.createBitmap(ImageUtil.getTintedVectorDrawable(context, R.drawable.ic_play_arrow_white_56dp, MaterialValueHelper.getPrimaryTextColor(context, false))));
 
         linkButtons(context, appWidgetView);
         pushUpdate(context, appWidgetIds, appWidgetView);
@@ -76,11 +77,11 @@ public class AppWidgetBig extends BaseAppWidget {
 
         // Set correct drawable for pause state
         int playPauseRes = isPlaying ? R.drawable.ic_pause_white_56dp : R.drawable.ic_play_arrow_white_56dp;
-        appWidgetView.setImageViewBitmap(R.id.button_toggle_play_pause, createBitmap(Util.getTintedVectorDrawable(service, playPauseRes, MaterialValueHelper.getPrimaryTextColor(service, false)), 1f));
+        appWidgetView.setImageViewBitmap(R.id.button_toggle_play_pause, ImageUtil.createBitmap(ImageUtil.getTintedVectorDrawable(service, playPauseRes, MaterialValueHelper.getPrimaryTextColor(service, false))));
 
         // Set prev/next button drawables
-        appWidgetView.setImageViewBitmap(R.id.button_next, createBitmap(Util.getTintedVectorDrawable(service, R.drawable.ic_skip_next_white_48dp, MaterialValueHelper.getPrimaryTextColor(service, false)), 1f));
-        appWidgetView.setImageViewBitmap(R.id.button_prev, createBitmap(Util.getTintedVectorDrawable(service, R.drawable.ic_skip_previous_white_48dp, MaterialValueHelper.getPrimaryTextColor(service, false)), 1f));
+        appWidgetView.setImageViewBitmap(R.id.button_next, ImageUtil.createBitmap(ImageUtil.getTintedVectorDrawable(service, R.drawable.ic_skip_next_white_48dp, MaterialValueHelper.getPrimaryTextColor(service, false))));
+        appWidgetView.setImageViewBitmap(R.id.button_prev, ImageUtil.createBitmap(ImageUtil.getTintedVectorDrawable(service, R.drawable.ic_skip_previous_white_48dp, MaterialValueHelper.getPrimaryTextColor(service, false))));
 
         // Link actions buttons to intents
         linkButtons(service, appWidgetView);

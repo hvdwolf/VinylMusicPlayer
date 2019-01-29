@@ -8,6 +8,8 @@ import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.loader.TopAndRecentlyPlayedTracksLoader;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.provider.HistoryStore;
+import com.poupa.vinylmusicplayer.util.MusicUtil;
+import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 
 import java.util.ArrayList;
 
@@ -18,6 +20,17 @@ public class HistoryPlaylist extends AbsSmartPlaylist {
 
     public HistoryPlaylist(@NonNull Context context) {
         super(context.getString(R.string.history), R.drawable.ic_access_time_white_24dp);
+    }
+
+    @NonNull
+    @Override
+    public String getInfoString(@NonNull Context context) {
+        String cutoff = PreferenceUtil.getInstance().getRecentlyPlayedCutoffText(context);
+
+        return MusicUtil.buildInfoString(
+            cutoff,
+            super.getInfoString(context)
+        );
     }
 
     @NonNull

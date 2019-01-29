@@ -11,17 +11,19 @@
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name="com.poupa.vinylmusicplayer.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.VinylMusicPlayer.Light"
         tools:ignore="UnusedAttribute">
-        <activity android:name="com.poupa.vinylmusicplayer.ui.activities.MainActivity">
+        <activity android:name="com.poupa.vinylmusicplayer.ui.activities.MainActivity"
+            android:label="@string/app_short_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.MUSIC_PLAYER" />
@@ -114,13 +116,15 @@
             android:label="@string/intro_label"
             android:theme="@style/Theme.Intro" />
         <activity
+            android:name=".ui.activities.saf.SAFGuideActivity"
+            android:theme="@style/Theme.Intro"/>
+        <activity
             android:name="com.poupa.vinylmusicplayer.ui.activities.bugreport.BugReportActivity"
             android:label="@string/report_an_issue" />
         <activity
             android:name="com.poupa.vinylmusicplayer.appshortcuts.AppShortcutLauncherActivity"
             android:launchMode="singleInstance"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-        <activity android:name=".ui.activities.PurchaseActivity" />
 
         <service
             android:name="com.poupa.vinylmusicplayer.service.MusicService"
@@ -202,7 +206,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
 
     <!-- Activity aliases to make it behave like the Joying FYT music player. This means that the Joying FYT music player can be removed

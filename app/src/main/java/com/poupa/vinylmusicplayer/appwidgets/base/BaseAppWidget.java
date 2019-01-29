@@ -16,12 +16,12 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.text.TextUtils;
 import android.widget.RemoteViews;
 
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.service.MusicService;
+import com.poupa.vinylmusicplayer.util.MusicUtil;
 
 public abstract class BaseAppWidget extends AppWidgetProvider {
     public static final String NAME = "app_widget";
@@ -85,14 +85,6 @@ public abstract class BaseAppWidget extends AppWidgetProvider {
         }
     }
 
-    protected static Bitmap createBitmap(Drawable drawable, float sizeMultiplier) {
-        Bitmap bitmap = Bitmap.createBitmap((int) (drawable.getIntrinsicWidth() * sizeMultiplier), (int) (drawable.getIntrinsicHeight() * sizeMultiplier), Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(bitmap);
-        drawable.setBounds(0, 0, c.getWidth(), c.getHeight());
-        drawable.draw(c);
-        return bitmap;
-    }
-
     protected static Bitmap createRoundedBitmap(Drawable drawable, int width, int height, float tl, float tr, float bl, float br) {
         if (drawable == null) return null;
 
@@ -150,12 +142,6 @@ public abstract class BaseAppWidget extends AppWidgetProvider {
     }
 
     protected String getSongArtistAndAlbum(final Song song) {
-        final StringBuilder builder = new StringBuilder();
-        builder.append(song.artistName);
-        if (!TextUtils.isEmpty(song.artistName) && !TextUtils.isEmpty(song.albumName)) {
-            builder.append(" • ");
-        }
-        builder.append(song.albumName);
-        return builder.toString();
+        return MusicUtil.getSongInfoString(song);
     }
 }

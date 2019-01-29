@@ -14,7 +14,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -28,17 +27,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
-import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
-import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.kabouzeid.appthemehelper.util.ATHUtil;
 import com.kabouzeid.appthemehelper.util.ColorUtil;
 import com.kabouzeid.appthemehelper.util.ToolbarContentTintHelper;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.adapter.base.MediaEntryViewHolder;
-import com.poupa.vinylmusicplayer.adapter.song.PlayingQueueAdapter;
 import com.poupa.vinylmusicplayer.dialogs.LyricsDialog;
 import com.poupa.vinylmusicplayer.dialogs.SongShareDialog;
 import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
@@ -48,6 +42,7 @@ import com.poupa.vinylmusicplayer.model.lyrics.Lyrics;
 import com.poupa.vinylmusicplayer.ui.activities.base.AbsSlidingMusicPanelActivity;
 import com.poupa.vinylmusicplayer.ui.fragments.player.AbsPlayerFragment;
 import com.poupa.vinylmusicplayer.ui.fragments.player.PlayerAlbumCoverFragment;
+import com.poupa.vinylmusicplayer.util.ImageUtil;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 import com.poupa.vinylmusicplayer.util.Util;
 import com.poupa.vinylmusicplayer.util.ViewUtil;
@@ -81,13 +76,6 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
     private CardPlayerPlaybackControlsFragment playbackControlsFragment;
     private PlayerAlbumCoverFragment playerAlbumCoverFragment;
 
-    private LinearLayoutManager layoutManager;
-
-    private PlayingQueueAdapter playingQueueAdapter;
-
-    private RecyclerView.Adapter wrappedAdapter;
-    private RecyclerViewDragDropManager recyclerViewDragDropManager;
-
     private AsyncTask updateIsFavoriteTask;
     private AsyncTask updateLyricsAsyncTask;
 
@@ -117,7 +105,7 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
         setUpPlayerToolbar();
         setUpSubFragments();
 
-        setUpRecyclerView();
+        setUpRecyclerView(recyclerView,slidingUpPanelLayout);
 
         slidingUpPanelLayout.addPanelSlideListener(this);
         slidingUpPanelLayout.setAntiDragView(view.findViewById(R.id.draggable_area));
@@ -132,16 +120,18 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
 
         // for some reason the xml attribute doesn't get applied here.
         playingQueueCard.setCardBackgroundColor(ATHUtil.resolveColor(getActivity(), R.attr.cardBackgroundColor));
+
+        //Allows the list items to draw out of bounds when swiping, but also makes the listview
+        //float above everything else. Disabling for now.
+
+//        playingQueueCard.setClipToOutline(false);
+//        disableClipOnParents(recyclerView);
     }
 
     @Override
     public void onDestroyView() {
         if (slidingUpPanelLayout != null) {
             slidingUpPanelLayout.removePanelSlideListener(this);
-        }
-        if (recyclerViewDragDropManager != null) {
-            recyclerViewDragDropManager.release();
-            recyclerViewDragDropManager = null;
         }
 
         if (recyclerView != null) {
@@ -150,12 +140,6 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
             recyclerView = null;
         }
 
-        if (wrappedAdapter != null) {
-            WrapperAdapterUtils.releaseAll(wrappedAdapter);
-            wrappedAdapter = null;
-        }
-        playingQueueAdapter = null;
-        layoutManager = null;
         super.onDestroyView();
         unbinder.unbind();
     }
@@ -248,28 +232,20 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
         return super.onMenuItemClick(item);
     }
 
-    private void setUpRecyclerView() {
-        recyclerViewDragDropManager = new RecyclerViewDragDropManager();
-        final GeneralItemAnimator animator = new RefactoredDefaultItemAnimator();
+    public void disableClipOnParents(View v) {
 
-        playingQueueAdapter = new PlayingQueueAdapter(
-                ((AppCompatActivity) getActivity()),
-                MusicPlayerRemote.getPlayingQueue(),
-                MusicPlayerRemote.getPosition(),
-                R.layout.item_list,
-                false,
-                null);
-        wrappedAdapter = recyclerViewDragDropManager.createWrappedAdapter(playingQueueAdapter);
 
-        layoutManager = new LinearLayoutManager(getActivity());
+        if (v.getParent() == null) {
+            return;
+        }
 
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(wrappedAdapter);
-        recyclerView.setItemAnimator(animator);
+        if (v instanceof ViewGroup) {
+            ((ViewGroup) v).setClipChildren(false);
+        }
 
-        recyclerViewDragDropManager.attachRecyclerView(recyclerView);
-
-        layoutManager.scrollToPositionWithOffset(MusicPlayerRemote.getPosition() + 1, 0);
+        if (v.getParent() instanceof View) {
+            disableClipOnParents((View) v.getParent());
+        }
     }
 
     private void updateIsFavorite() {
@@ -292,7 +268,7 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
                 if (activity != null) {
                     int res = isFavorite ? R.drawable.ic_favorite_white_24dp : R.drawable.ic_favorite_border_white_24dp;
                     int color = ToolbarContentTintHelper.toolbarContentColor(activity, Color.TRANSPARENT);
-                    Drawable drawable = Util.getTintedVectorDrawable(activity, res, color);
+                    Drawable drawable = ImageUtil.getTintedVectorDrawable(activity, res, color);
                     toolbar.getMenu().findItem(R.id.action_toggle_favorite)
                             .setIcon(drawable)
                             .setTitle(isFavorite ? getString(R.string.action_remove_from_favorites) : getString(R.string.action_add_to_favorites));
@@ -335,7 +311,7 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
                     if (toolbar != null && activity != null)
                         if (toolbar.getMenu().findItem(R.id.action_show_lyrics) == null) {
                             int color = ToolbarContentTintHelper.toolbarContentColor(activity, Color.TRANSPARENT);
-                            Drawable drawable = Util.getTintedVectorDrawable(activity, R.drawable.ic_comment_text_outline_white_24dp, color);
+                            Drawable drawable = ImageUtil.getTintedVectorDrawable(activity, R.drawable.ic_comment_text_outline_white_24dp, color);
                             toolbar.getMenu()
                                     .add(Menu.NONE, R.id.action_show_lyrics, Menu.NONE, R.string.action_show_lyrics)
                                     .setIcon(drawable)
@@ -566,7 +542,7 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
         public void updateCurrentSong(Song song) {
             currentSong = song;
             currentSongViewHolder.title.setText(song.title);
-            currentSongViewHolder.text.setText(song.artistName);
+            currentSongViewHolder.text.setText(MusicUtil.getSongInfoString(song));
         }
 
         @Override
@@ -601,7 +577,7 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
         @Override
         public void updateCurrentSong(Song song) {
             fragment.toolbar.setTitle(song.title);
-            fragment.toolbar.setSubtitle(song.artistName);
+            fragment.toolbar.setSubtitle(MusicUtil.getSongInfoString(song));
         }
 
         @Override

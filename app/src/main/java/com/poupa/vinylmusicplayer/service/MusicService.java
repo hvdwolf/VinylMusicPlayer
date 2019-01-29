@@ -47,7 +47,6 @@ import com.poupa.vinylmusicplayer.glide.VinylSimpleTarget;
 import com.poupa.vinylmusicplayer.helper.ShuffleHelper;
 import com.poupa.vinylmusicplayer.helper.StopWatch;
 import com.poupa.vinylmusicplayer.loader.PlaylistSongLoader;
-import com.poupa.vinylmusicplayer.loader.ReplaygainTagExtractor;
 import com.poupa.vinylmusicplayer.model.AbsCustomPlaylist;
 import com.poupa.vinylmusicplayer.model.Playlist;
 import com.poupa.vinylmusicplayer.model.Song;
@@ -82,6 +81,7 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
     public static final String ACTION_SKIP = VINYL_MUSIC_PLAYER_PACKAGE_NAME + ".skip";
     public static final String ACTION_REWIND = VINYL_MUSIC_PLAYER_PACKAGE_NAME + ".rewind";
     public static final String ACTION_QUIT = VINYL_MUSIC_PLAYER_PACKAGE_NAME + ".quitservice";
+    public static final String ACTION_PENDING_QUIT = VINYL_MUSIC_PLAYER_PACKAGE_NAME + ".pendingquitservice";
     public static final String INTENT_EXTRA_PLAYLIST = VINYL_MUSIC_PLAYER_PACKAGE_NAME + "intentextra.playlist";
     public static final String INTENT_EXTRA_SHUFFLE_MODE = VINYL_MUSIC_PLAYER_PACKAGE_NAME + ".intentextra.shufflemode";
 
@@ -93,7 +93,7 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
     public static final String QUEUE_CHANGED = VINYL_MUSIC_PLAYER_PACKAGE_NAME + ".queuechanged";
     public static final String PLAY_STATE_CHANGED = VINYL_MUSIC_PLAYER_PACKAGE_NAME + ".playstatechanged";
 
-    public static final String TRANSPARENT_WIDGET_CHANGED = VINYL_MUSIC_PLAYER_PACKAGE_NAME + ".metachanged";
+    public static final String TRANSPARENT_WIDGET_CHANGED = VINYL_MUSIC_PLAYER_PACKAGE_NAME + ".transparentwidgetchanged";
 
     public static final String REPEAT_MODE_CHANGED = VINYL_MUSIC_PLAYER_PACKAGE_NAME + ".repeatmodechanged";
     public static final String SHUFFLE_MODE_CHANGED = VINYL_MUSIC_PLAYER_PACKAGE_NAME + ".shufflemodechanged";
@@ -125,6 +125,8 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
     public static final int SAVE_QUEUES = 0;
 
     private final IBinder musicBind = new MusicBinder();
+
+    public boolean pendingQuit = false;
 
     private AppWidgetBig appWidgetBig = AppWidgetBig.getInstance();
     private AppWidgetClassic appWidgetClassic = AppWidgetClassic.getInstance();
@@ -336,7 +338,11 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
                         break;
                     case ACTION_STOP:
                     case ACTION_QUIT:
+                        pendingQuit = false;
                         quit();
+                        break;
+                    case ACTION_PENDING_QUIT:
+                        pendingQuit = true;
                         break;
                 }
             }
@@ -886,23 +892,19 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
 
     private void applyReplayGain() {
         byte mode = PreferenceUtil.getInstance().getReplayGainSourceMode();
-        if (mode != 0) {
+        if (mode != PreferenceUtil.RG_SOURCE_MODE_NONE) {
             Song song = getCurrentSong();
 
-            if (Float.isNaN(song.replaygainTrack)) {
-                ReplaygainTagExtractor.setReplaygainValues(song);
-            }
-
             float adjust = 0f;
+            float rgTrack = song.getReplayGainTrack();
+            float rgAlbum = song.getReplayGainAlbum();
 
-            if (mode == 2) {
-                adjust = (song.replaygainTrack != 0 ? song.replaygainTrack : adjust);
-                adjust = (song.replaygainAlbum != 0 ? song.replaygainAlbum : adjust);
-            }
-
-            if (mode == 1) {
-                adjust = (song.replaygainAlbum != 0 ? song.replaygainAlbum : adjust);
-                adjust = (song.replaygainTrack != 0 ? song.replaygainTrack : adjust);
+            if (mode == PreferenceUtil.RG_SOURCE_MODE_ALBUM) {
+                adjust = (rgTrack != 0 ? rgTrack : adjust);
+                adjust = (rgAlbum != 0 ? rgAlbum : adjust);
+            } else if (mode == PreferenceUtil.RG_SOURCE_MODE_TRACK) {
+                adjust = (rgAlbum != 0 ? rgAlbum : adjust);
+                adjust = (rgTrack != 0 ? rgTrack : adjust);
             }
 
             if (adjust == 0) {
@@ -914,9 +916,9 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
             float rgResult = ((float) Math.pow(10, (adjust / 20)));
             rgResult = Math.max(0, Math.min(1, rgResult));
 
-            playback.setReplaygain(rgResult);
+            playback.setReplayGain(rgResult);
         } else {
-            playback.setReplaygain(Float.NaN);
+            playback.setReplayGain(Float.NaN);
         }
     }
 
@@ -1245,7 +1247,16 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
                     break;
 
                 case TRACK_ENDED:
-                    if (service.getRepeatMode() == REPEAT_MODE_NONE && service.isLastTrack()) {
+                    // if there is a timer finished, don't continue
+                    if (service.pendingQuit ||
+                            service.getRepeatMode() == REPEAT_MODE_NONE && service.isLastTrack()) {
+                        service.notifyChange(PLAY_STATE_CHANGED);
+                        service.seek(0);
+                        if (service.pendingQuit) {
+                            service.pendingQuit = false;
+                            service.quit();
+                            break;
+                        }
                         service.notifyChange(PLAY_STATE_CHANGED);
                         service.seek(0);
                     } else {

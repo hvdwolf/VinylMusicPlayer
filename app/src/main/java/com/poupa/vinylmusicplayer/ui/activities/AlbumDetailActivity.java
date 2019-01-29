@@ -23,10 +23,6 @@ import android.widget.Toast;
 import com.afollestad.materialcab.MaterialCab;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.util.DialogUtils;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.github.ksoichiro.android.observablescrollview.ObservableRecyclerView;
 import com.kabouzeid.appthemehelper.util.ColorUtil;
 import com.kabouzeid.appthemehelper.util.MaterialValueHelper;
@@ -38,7 +34,6 @@ import com.poupa.vinylmusicplayer.dialogs.SleepTimerDialog;
 import com.poupa.vinylmusicplayer.glide.GlideApp;
 import com.poupa.vinylmusicplayer.glide.VinylColoredTarget;
 import com.poupa.vinylmusicplayer.glide.VinylGlideExtension;
-import com.poupa.vinylmusicplayer.glide.palette.BitmapPaletteWrapper;
 import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
 import com.poupa.vinylmusicplayer.interfaces.CabHolder;
 import com.poupa.vinylmusicplayer.interfaces.LoaderIds;
@@ -55,7 +50,7 @@ import com.poupa.vinylmusicplayer.ui.activities.tageditor.AbsTagEditorActivity;
 import com.poupa.vinylmusicplayer.ui.activities.tageditor.AlbumTagEditorActivity;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 import com.poupa.vinylmusicplayer.util.NavigationUtil;
-import com.poupa.vinylmusicplayer.util.Util;
+import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 import com.poupa.vinylmusicplayer.util.VinylMusicPlayerColorUtil;
 
 import java.util.ArrayList;
@@ -106,6 +101,8 @@ public class AlbumDetailActivity extends AbsSlidingMusicPanelActivity implements
     TextView songCountTextView;
     @BindView(R.id.album_year_text)
     TextView albumYearTextView;
+    @BindView(R.id.title)
+    TextView titleTextView;
 
     private AlbumSongAdapter adapter;
 
@@ -278,7 +275,7 @@ public class AlbumDetailActivity extends AbsSlidingMusicPanelActivity implements
                             return;
                         }
 
-                        if (!Util.isAllowedToDownloadMetadata(AlbumDetailActivity.this)) {
+                        if (!PreferenceUtil.isAllowedToDownloadMetadata(AlbumDetailActivity.this)) {
                             if (wiki != null) {
                                 wikiDialog.setContent(wiki);
                             } else {
@@ -339,7 +336,7 @@ public class AlbumDetailActivity extends AbsSlidingMusicPanelActivity implements
                             .positiveText(android.R.string.ok)
                             .build();
                 }
-                if (Util.isAllowedToDownloadMetadata(this)) {
+                if (PreferenceUtil.isAllowedToDownloadMetadata(this)) {
                     if (wiki != null) {
                         wikiDialog.setContent(wiki);
                         wikiDialog.show();
@@ -416,11 +413,11 @@ public class AlbumDetailActivity extends AbsSlidingMusicPanelActivity implements
         this.album = album;
         loadAlbumCover();
 
-        if (Util.isAllowedToDownloadMetadata(this)) {
+        if (PreferenceUtil.isAllowedToDownloadMetadata(this)) {
             loadWiki();
         }
 
-        getSupportActionBar().setTitle(album.getTitle());
+        titleTextView.setText(album.getTitle());
         artistTextView.setText(album.getArtistName());
         songCountTextView.setText(MusicUtil.getSongCountString(this, album.getSongCount()));
         durationTextView.setText(MusicUtil.getReadableDurationString(MusicUtil.getTotalDuration(this, album.songs)));
