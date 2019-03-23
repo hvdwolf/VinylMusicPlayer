@@ -1,8 +1,18 @@
 #/bin/sh
+export BASE="/media/harryvanderwolf/64GB/android-sdk-ndk"
+
+export "PATH=$PATH:$BASE/android-sdk/tools:$BASE/android-sdk/platform-tools:$BASE/android-sdk/build-tools/26.0.1:$BASE/android-sdk/ndk-bundle:$BASE/cargo/bin"
+export "ANDROID_SDK_ROOT=$BASE/android-sdk"
+export "ANDROID_HOME=$BASE/android-sdk"
+export "NDK=$BASE/android-sdk/ndk-bundle"
+export "NDK_HOME=$BASE/android-sdk/ndk-bundle"
+export "NDK_MODULE_PATH=$BASE/android-sdk/ndk-bundle"
+export "SLAVE_AAPT_TIMEOUT=30"
+
 
 curpath=`pwd`
 
 ${curpath}/gradlew assembleDebug
 
-cp -v app/build/outputs/apk/debug/app-debug.apk VinylMusicPlayer.apk
-
+#cp -v app/build/outputs/apk/debug/app-debug.apk VinylMusicPlayer.apk
+cp -v "./app/build/outputs/apk/production/debug/vinyl-productionDebug-0.20.2 DEBUG .apk" VinylMusicPlayer.apk

@@ -42,7 +42,7 @@ public class PlayingNotificationImpl24 extends PlayingNotification {
         final String text = MusicUtil.getSongInfoString(song);
 
         final int playButtonResId = isPlaying
-                ? R.drawable.ic_pause_white_56dp : R.drawable.ic_play_arrow_white_56dp;
+                ? R.drawable.ic_pause_white_48dp : R.drawable.ic_play_arrow_white_48dp;
 
         Intent action = new Intent(service, MainActivity.class);
         action.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);

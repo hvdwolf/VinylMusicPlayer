@@ -2,6 +2,7 @@ package com.poupa.vinylmusicplayer.loader;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.MergeCursor;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.AudioColumns;
@@ -13,6 +14,7 @@ import com.poupa.vinylmusicplayer.provider.BlacklistStore;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Karim Abou Zeid (kabouzeid)
@@ -27,11 +29,14 @@ public class SongLoader {
             AudioColumns.DURATION,// 4
             AudioColumns.DATA,// 5
             AudioColumns.DATE_MODIFIED,// 6
-            AudioColumns.ALBUM_ID,// 7
-            AudioColumns.ALBUM,// 8
-            AudioColumns.ARTIST_ID,// 9
-            AudioColumns.ARTIST,// 10
+            AudioColumns.DATE_ADDED,// 7
+            AudioColumns.ALBUM_ID,// 8
+            AudioColumns.ALBUM,// 9
+            AudioColumns.ARTIST_ID,// 10
+            AudioColumns.ARTIST,// 11
     };
+
+    private static final int BATCH_SIZE = 900; // used in makeSongCursor* functions. SQLite limit on the number of ?argument is 999, we leave some to the other call sites.
 
     @NonNull
     public static ArrayList<Song> getAllSongs(@NonNull Context context) {
@@ -87,13 +92,52 @@ public class SongLoader {
         final int year = cursor.getInt(3);
         final long duration = cursor.getLong(4);
         final String data = cursor.getString(5);
-        final long dateModified = cursor.getLong(6);
-        final int albumId = cursor.getInt(7);
-        final String albumName = cursor.getString(8);
-        final int artistId = cursor.getInt(9);
-        final String artistName = cursor.getString(10);
+        final long dateAdded = cursor.getLong(6);
+        final long dateModified = cursor.getLong(7);
+        final int albumId = cursor.getInt(8);
+        final String albumName = cursor.getString(9);
+        final int artistId = cursor.getInt(10);
+        final String artistName = cursor.getString(11);
 
-        return new Song(id, title, trackNumber, year, duration, data, dateModified, albumId, albumName, artistId, artistName);
+        return new Song(id, title, trackNumber, year, duration, data, dateAdded, dateModified, albumId, albumName, artistId, artistName);
+    }
+
+    @Nullable
+    public static Cursor makeSongCursorFromPaths(@NonNull final Context context, @NonNull ArrayList<String> paths) {
+        // Exclude blacklist
+        paths.removeAll(BlacklistStore.getInstance(context).getPaths());
+
+        int remaining = paths.size();
+        int processed = 0;
+
+        ArrayList<Cursor> cursors = new ArrayList<>();
+        final String sortOrder = PreferenceUtil.getInstance().getSongSortOrder();
+        while (remaining > 0) {
+            final int currentBatch = Math.min(BATCH_SIZE, remaining);
+
+            StringBuilder selection = new StringBuilder();
+            selection.append(BASE_SELECTION + " AND " + MediaStore.Audio.AudioColumns.DATA + " IN (?");
+            for (int i = 1; i < currentBatch; i++) {
+                selection.append(",?");
+            }
+            selection.append(")");
+
+            try {
+                Cursor cursor = context.getContentResolver().query(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    BASE_PROJECTION, 
+                    selection.toString(), 
+                    paths.subList(processed, processed + currentBatch).toArray(new String[currentBatch]),
+                    sortOrder
+                );
+                if (cursor != null) {cursors.add(cursor);};
+            } catch (SecurityException ignored) {
+            }
+
+            remaining -= currentBatch;
+            processed += currentBatch;
+        }
+        return new MergeCursor(cursors.toArray(new Cursor[cursors.size()]));
     }
 
     @Nullable
@@ -110,35 +154,59 @@ public class SongLoader {
         }
 
         // Blacklist
-        ArrayList<String> paths = BlacklistStore.getInstance(context).getPaths();
-        if (!paths.isEmpty()) {
-            selection = generateBlacklistSelection(selection, paths.size());
-            selectionValues = addBlacklistSelectionValues(selectionValues, paths);
-        }
+        final ArrayList<String> paths = BlacklistStore.getInstance(context).getPaths();
+        int remaining = paths.size();
+        int processed = 0;
 
-        try {
-            return context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    BASE_PROJECTION, selection, selectionValues, sortOrder);
-        } catch (SecurityException e) {
-            return null;
+        ArrayList<Cursor> cursors = new ArrayList<>();
+        while (remaining > 0) {
+            final int currentBatch = Math.min(BATCH_SIZE, remaining);
+
+            // Enrich the base selection with the current batch parameters
+            String batchSelection = generateBlacklistSelection(selection, currentBatch);
+            ArrayList<String> batchSelectionValues = addBlacklistSelectionValues(selectionValues, paths.subList(processed, processed + currentBatch));
+
+            try {
+                Cursor cursor = context.getContentResolver().query(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    BASE_PROJECTION,
+                    batchSelection,
+                    batchSelectionValues.toArray(new String[batchSelectionValues.size()]),
+                    sortOrder
+                );
+                if (cursor != null) {cursors.add(cursor);}
+            } catch (SecurityException ignored) {
+            }
+
+            remaining -= currentBatch;
+            processed += currentBatch;
         }
+        return new MergeCursor(cursors.toArray(new Cursor[cursors.size()]));
     }
 
     private static String generateBlacklistSelection(String selection, int pathCount) {
-        String newSelection = selection != null && !selection.trim().equals("") ? selection + " AND " : "";
-        newSelection += AudioColumns.DATA + " NOT LIKE ?";
-        for (int i = 0; i < pathCount - 1; i++) {
-            newSelection += " AND " + AudioColumns.DATA + " NOT LIKE ?";
+        StringBuilder newSelection = new StringBuilder(selection != null && !selection.trim().equals("") ? selection + " AND " : "");
+        newSelection.append(AudioColumns.DATA + " NOT LIKE ?");
+        for (int i = 1; i < pathCount; i++) {
+            newSelection.append(" AND " + AudioColumns.DATA + " NOT LIKE ?");
         }
-        return newSelection;
+        return newSelection.toString();
     }
 
-    private static String[] addBlacklistSelectionValues(String[] selectionValues, ArrayList<String> paths) {
-        if (selectionValues == null) selectionValues = new String[0];
-        String[] newSelectionValues = new String[selectionValues.length + paths.size()];
-        System.arraycopy(selectionValues, 0, newSelectionValues, 0, selectionValues.length);
-        for (int i = selectionValues.length; i < newSelectionValues.length; i++) {
-            newSelectionValues[i] = paths.get(i - selectionValues.length) + "%";
+    private static ArrayList<String> addBlacklistSelectionValues(String[] selectionValues, @NonNull final List<String> paths) {
+        ArrayList<String> newSelectionValues = null;
+        if (selectionValues == null) {
+            newSelectionValues = new ArrayList<String>(paths.size());
+        }
+        else {
+            newSelectionValues = new ArrayList<String>(selectionValues.length + paths.size());
+            for (int i=0; i < selectionValues.length; ++i) {
+                newSelectionValues.add(selectionValues[i]);
+            }
+        }
+
+        for (int i = 0; i < paths.size(); i++) {
+            newSelectionValues.add(paths.get(i) + "%");
         }
         return newSelectionValues;
     }

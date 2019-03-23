@@ -31,7 +31,7 @@ import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 import java.util.ArrayList;
 
 public class TopAndRecentlyPlayedTracksLoader {
-    public static final int NUMBER_OF_TOP_TRACKS = 99;
+    public static final int NUMBER_OF_TOP_TRACKS = 100;
 
     @NonNull
     public static ArrayList<Song> getRecentlyPlayedTracks(@NonNull Context context) {
@@ -39,20 +39,24 @@ public class TopAndRecentlyPlayedTracksLoader {
     }
 
     @NonNull
-    public static ArrayList<Song> getNotRecentlyPlayedTracks
-(@NonNull Context context) {
+    public static ArrayList<Song> getNotRecentlyPlayedTracks(@NonNull Context context) {
         ArrayList<Song> allSongs = SongLoader.getSongs(
             SongLoader.makeSongCursor(
                 context,
                 null, null,
                 MediaStore.Audio.Media.DATE_ADDED + " ASC"));
 
-        ArrayList<Song> recentlyPlayedSongs = SongLoader.getSongs(
-            makeRecentTracksCursorAndClearUpDatabase(context));
+        ArrayList<Song> playedSongs = SongLoader.getSongs(
+            makePlayedTracksCursorAndClearUpDatabase(context));
 
-        allSongs.removeAll(recentlyPlayedSongs);
+        ArrayList<Song> notRecentlyPlayedSongs = SongLoader.getSongs(
+            makeNotRecentTracksCursorAndClearUpDatabase(context));
 
-        return allSongs;
+        ArrayList<Song> result = allSongs;
+        result.removeAll(playedSongs);
+        result.addAll(notRecentlyPlayedSongs);
+
+        return result;
     }
 
     @NonNull
@@ -62,7 +66,22 @@ public class TopAndRecentlyPlayedTracksLoader {
 
     @Nullable
     public static Cursor makeRecentTracksCursorAndClearUpDatabase(@NonNull final Context context) {
-        SortedLongCursor retCursor = makeRecentTracksCursorImpl(context);
+        return makeRecentTracksCursorAndClearUpDatabaseImpl(context, false, false);
+    }
+
+     @Nullable
+    public static Cursor makePlayedTracksCursorAndClearUpDatabase(@NonNull final Context context) {
+        return makeRecentTracksCursorAndClearUpDatabaseImpl(context, true, false);
+    }
+
+     @Nullable
+    public static Cursor makeNotRecentTracksCursorAndClearUpDatabase(@NonNull final Context context) {
+        return makeRecentTracksCursorAndClearUpDatabaseImpl(context, false, true);
+    }
+
+     @Nullable
+    private static Cursor makeRecentTracksCursorAndClearUpDatabaseImpl(@NonNull final Context context, boolean ignoreCutoffTime, boolean reverseOrder) {
+        SortedLongCursor retCursor = makeRecentTracksCursorImpl(context, ignoreCutoffTime, reverseOrder);
 
         // clean up the databases with any ids not found
         if (retCursor != null) {
@@ -93,10 +112,9 @@ public class TopAndRecentlyPlayedTracksLoader {
     }
 
     @Nullable
-    private static SortedLongCursor makeRecentTracksCursorImpl(@NonNull final Context context) {
-        // first get the top results ids from the internal database
-        final long cutoff = PreferenceUtil.getInstance().getRecentlyPlayedCutoffTimeMillis();
-        Cursor songs = HistoryStore.getInstance(context).queryRecentIds(cutoff);
+    private static SortedLongCursor makeRecentTracksCursorImpl(@NonNull final Context context, boolean ignoreCutoffTime, boolean reverseOrder) {
+        final long cutoff = (ignoreCutoffTime ? 0 : PreferenceUtil.getInstance().getRecentlyPlayedCutoffTimeMillis());
+        Cursor songs = HistoryStore.getInstance(context).queryRecentIds(cutoff * (reverseOrder ? -1 : 1));
 
         try {
             return makeSortedCursor(context, songs,

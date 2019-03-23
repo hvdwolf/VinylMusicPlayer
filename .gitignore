@@ -2,6 +2,10 @@
 *.apk
 *.ap_
 
+# Archives created for intermediate backups
+*.zip
+*.tgz
+
 # files for the dex VM
 *.dex
 
@@ -19,6 +23,7 @@ target/
 # gradle files
 .gradle/
 build/
+app/build/
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -38,3 +43,6 @@ captures/
 .DS_Store
 
 app/release/
+
+#local scripts
+compile

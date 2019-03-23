@@ -137,7 +137,7 @@ public class PlayingNotificationImpl extends PlayingNotification {
 
                                 Bitmap prev = ImageUtil.createBitmap(ImageUtil.getTintedVectorDrawable(service, R.drawable.ic_skip_previous_white_48dp, primary), 1.5f);
                                 Bitmap next = ImageUtil.createBitmap(ImageUtil.getTintedVectorDrawable(service, R.drawable.ic_skip_next_white_48dp, primary), 1.5f);
-                                Bitmap playPause = ImageUtil.createBitmap(ImageUtil.getTintedVectorDrawable(service, isPlaying ? R.drawable.ic_pause_white_56dp : R.drawable.ic_play_arrow_white_56dp, primary), 1.5f);
+                                Bitmap playPause = ImageUtil.createBitmap(ImageUtil.getTintedVectorDrawable(service, isPlaying ? R.drawable.ic_pause_white_48dp : R.drawable.ic_play_arrow_white_48dp, primary), 1.5f);
 
                                 notificationLayout.setTextColor(R.id.title, primary);
                                 notificationLayout.setTextColor(R.id.text, secondary);
